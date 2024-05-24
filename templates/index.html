@@ -86,7 +86,7 @@
                 .then(data => {
                     const formattedHolding = data.top_10000_token_holding.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                     document.getElementById('totalHolding').innerHTML = `<img class="circular-token" src="static/images/token-image-url.jpg" alt="Token">${formattedHolding} $OCEAN`;
-                    document.getElementById('tokenInfo').innerHTML = `Price: $${data.price}<br>Total Current Holder: ${data.total_current_holder}`;
+                    document.getElementById('tokenInfo').innerHTML = `Price: $${data.price}<br>Total Current Holders: ${data.total_current_holder}`;
                     
                     const topWalletsContainer = document.getElementById('topWallets');
                     topWalletsContainer.innerHTML = '<h2>Top Wallets</h2>';
