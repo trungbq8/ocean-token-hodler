@@ -27,6 +27,10 @@
             font-size: 2.5em;
             margin-bottom: 20px;
         }
+        #tokenInfo {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
         #totalHolding {
             font-size: 2.5em;
             font-weight: bold;
@@ -42,6 +46,16 @@
         .circular-token {
             border-radius: 50%;
             object-fit: cover;
+        }
+        #topWallets {
+            font-size: 1.2em;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 20px;
+        }
+        .wallet-item {
+            margin-bottom: 10px;
         }
         #background-image {
             position: absolute;
@@ -66,20 +80,33 @@
         }
     </style>
     <script>
-        function fetchTotalHolding() {
-            fetch('/token_holding')
+        function fetchTokenInfo() {
+            fetch('/token_analysis')
                 .then(response => response.json())
                 .then(data => {
-                    const holdingValue = data.token_holding + ' $OCEAN';
-                    document.getElementById('totalHolding').innerHTML = '<img class = "circular-token "src="static/images/token-image-url.jpg" alt="Token">' + data.token_holding + ' $OCEAN';
-                    document.title = holdingValue;
+                    const formattedHolding = data.top_10000_token_holding.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    document.getElementById('totalHolding').innerHTML = `<img class="circular-token" src="static/images/token-image-url.jpg" alt="Token">${formattedHolding} $OCEAN`;
+                    document.getElementById('tokenInfo').innerHTML = `Price: $${data.price}<br>Total Current Holder: ${data.total_current_holder}`;
+                    
+                    const topWalletsContainer = document.getElementById('topWallets');
+                    topWalletsContainer.innerHTML = '<h2>Top Wallets</h2>';
+                    const topWallets = data.top_wallets;
+                    Object.keys(topWallets).forEach(key => {
+                        const walletAddress = Object.keys(topWallets[key])[0];
+                        const walletAmount = topWallets[key][walletAddress];
+                        const listItem = document.createElement('div');
+                        listItem.classList.add('wallet-item');
+                        listItem.innerHTML = `<strong>Wallet Address:</strong> <a href="https://suiscan.xyz/mainnet/account/${walletAddress}" target="_blank" style="color:white">${walletAddress}</a><br><strong>Amount:</strong> $${walletAmount}`;
+                        topWalletsContainer.appendChild(listItem);
+                    });
+                    document.title = formattedHolding;
                 })
-                .catch(error => console.error('Error fetching total supply:', error));
+                .catch(error => console.error('Error fetching token info:', error));
         }
-        setInterval(fetchTotalHolding, 30000);
+        setInterval(fetchTokenInfo, 30000);
     </script>
 </head>
-<body onload="fetchTotalHolding()">
+<body onload="fetchTokenInfo()">
     <div id="video-background-container">
         <div id="background-image"></div>
         <video id="video-background" autoplay loop muted>
@@ -89,7 +116,9 @@
     </div>
     <div class="container">
         <h1>$OCEAN Hodling by Top 10,000 Accounts</h1>
-        <p><span id="totalHolding">Loading...</span></p>
+        <p><span id="totalHolding"><img src="static/images/loading.gif" alt="Loading">Loading...</span></p>
+        <div id="tokenInfo"></div>
+        <div id="topWallets"></div>
     </div>
 </body>
 </html>
